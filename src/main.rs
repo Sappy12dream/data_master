@@ -22,6 +22,23 @@ fn read_csv_data(file_path: &str) -> Result<csv::Reader<File>, Box<dyn Error>> {
     Ok(csv_reader)
 }
 
+// Function to list column names in the CLI
+fn list_column_names(column_names: &[String]) {
+    println!("Column Names:");
+    for name in column_names {
+        println!("{}", name);
+    }
+}
+
+// Function to read CSV data from a file
+fn get_headers(csv_reader: &mut csv::Reader<File>) -> Result<Vec<String>, Box<dyn Error>> {
+    let headers = csv_reader
+        .headers()?
+        .iter()
+        .map(|h| h.to_string())
+        .collect();
+    Ok(headers)
+}
 // Function to create and populate the table
 fn create_and_populate_table(csv_reader: &mut csv::Reader<File>) -> Result<Table, Box<dyn Error>> {
     let mut table = Table::new();
@@ -42,7 +59,8 @@ fn main() -> Result<(), Box<dyn Error>> {
 
     // Read CSV data
     let mut csv_reader = read_csv_data(&file_path)?;
-
+    let column_names = get_headers(&mut csv_reader)?;
+    list_column_names(&column_names);
     // Create and populate the table
     let table = create_and_populate_table(&mut csv_reader)?;
 
