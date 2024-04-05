@@ -3,6 +3,7 @@ extern crate prettytable;
 
 use csv::ReaderBuilder;
 use prettytable::{Cell, Row, Table};
+use std::collections::HashMap;
 use std::error::Error;
 use std::fs::File;
 use std::io;
@@ -29,7 +30,26 @@ fn list_column_names(column_names: &[String]) {
         println!("{}", name);
     }
 }
+// Function to count occurrences of values in one column based on values in another column
+fn count_column_by_other_column(
+    csv_reader: &mut csv::Reader<File>,
+    count_column_index: usize,
+    group_by_column_index: usize,
+) -> Result<HashMap<String, usize>, Box<dyn Error>> {
+    let mut counts: HashMap<String, usize> = HashMap::new();
 
+    for result in csv_reader.records() {
+        let record = result?;
+        if let Some(count_column_value) = record.get(count_column_index) {
+            if let Some(group_by_column_value) = record.get(group_by_column_index) {
+                let entry = counts.entry(group_by_column_value.to_string()).or_insert(0);
+                *entry += 1;
+            }
+        }
+    }
+
+    Ok(counts)
+}
 // Function to read CSV data from a file
 fn get_headers(csv_reader: &mut csv::Reader<File>) -> Result<Vec<String>, Box<dyn Error>> {
     let headers = csv_reader
